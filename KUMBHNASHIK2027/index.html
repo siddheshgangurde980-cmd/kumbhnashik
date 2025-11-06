@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MahaKumbh Nashik AI Companion</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Styles & Color Palette */
+        :root {
+            --color-saffron: #F4A261;
+            --color-river-blue: #457B9D;
+            --color-ashram-white: #FAF3E0;
+            --color-accent-gold: #E9C46A;
+            --color-sos-red: #D90429;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--color-ashram-white);
+        }
+        .app-container {
+            min-height: 100vh;
+            max-width: 420px; /* Mobile-first container width */
+            margin: 0 auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            position: relative;
+        }
+        .main-button {
+            background-color: var(--color-river-blue);
+            color: white;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 var(--color-saffron);
+        }
+        .main-button:active {
+            box-shadow: 0 0 0 var(--color-saffron);
+            transform: translateY(4px);
+        }
+        .header-active {
+            border-bottom: 2px solid var(--color-saffron);
+            color: var(--color-saffron) !important;
+        }
+        #app-title{
+            text-align: right;
+            
+        }
+        .hidden-view, .hidden { display: none !important; }
+
+        /* New styles for language and event tabs */
+        .lang-btn, .event-tab-btn {
+            transition: all 0.2s ease-in-out;
+            border-bottom: 2px solid transparent;
+        }
+        .lang-btn.active, .event-tab-btn.active {
+            border-bottom-color: var(--color-saffron);
+            color: var(--color-saffron);
+            font-weight: 600;
+        }
+        /* New styles for plan selectors */
+        .interest-chip, .mobility-chip {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            border: 1px solid #d1d5db; /* gray-300 */
+            font-size: 0.875rem; /* text-sm */
+        }
+        .interest-chip:hover, .mobility-chip:hover {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        input:checked + .interest-chip {
+            background-color: #D1FAE5; /* green-100 */
+            border-color: #10B981; /* green-500 */
+            color: #065F46; /* green-800 */
+            font-weight: 500;
+        }
+        input:checked + .mobility-chip {
+            background-color: #DBEAFE; /* blue-100 */
+            border-color: #3B82F6; /* blue-500 */
+            color: #1E40AF; /* blue-800 */
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body > 
+
+    <div class="app-container p-4 pb-20"> <!-- Added padding-bottom for nav bar -->
+
+        <!-- Fixed Header -->
+        <!-- UPDATED: Added relative positioning and profile button -->
+        <header class="sticky top-0 bg-white pt-4 pb-2 z-10 border-b border-gray-100 relative">
+            
+            <!-- NEW: Profile Icon Button -->
+            <button onclick="navigate('profile-view')" class="absolute top-2 left-1 p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label="Open Profile">
+                <i data-lucide="user-circle" class="w-7 h-7" style="color: var(--color-river-blue);"></i>
+                
+            </button>
+            
+            <h1 id="app-title" class="text-3xl font-bold text-center" style="color: var(--color-river-blue);">MahaKumbh Nashik</h1>
+        
+        </header>
+
+        <!-- Main View Container -->
+        <main class="py-4">
+
+            <!-- 1. Home Screen -->
+            <section id="home-view" class="view">
+                <div class="bg-gray-50 p-4 rounded-xl shadow-md" style="background-color: var(--color-ashram-white); border: 1px solid #e0e0e0;">
+                    <p id="welcome-message" class="text-xl font-semibold mb-1" style="color: var(--color-saffron);">🙏 Namaste, Devotee!</p>
+                    <p id="welcome-subtitle" class="text-sm text-gray-700" data-lang-key="welcome_subtitle">Your AI-guided Kumbh journey starts here.</p>
+                </div>
+
+                <!-- Language Selector -->
+                <div id="language-selector" class="mt-4 flex justify-center gap-4 bg-white p-2 rounded-xl shadow-sm">
+                    <button class="lang-btn text-sm px-3 py-1 text-gray-600" onclick="switchLanguage('en')">English</button>
+                    <button class="lang-btn text-sm px-3 py-1 text-gray-600" onclick="switchLanguage('hi')">हिन्दी</button>
+                    <button class="lang-btn text-sm px-3 py-1 text-gray-600" onclick="switchLanguage('mr')">मराठी</button>
+                </div>
+
+
+                <div class="mt-8 grid grid-cols-2 gap-4">
+                    <!-- Quick Action Cards -->
+                    <div class="quick-card p-4 rounded-xl shadow-lg cursor-pointer transition hover:shadow-xl" onclick="navigate('plan-view')" style="background-color: var(--color-river-blue); color: white;">
+                        <i data-lucide="compass" class="w-8 h-8 mb-2" style="color: var(--color-accent-gold);"></i>
+                        <p class="font-semibold text-lg" data-lang-key="plan_my_day">Plan My Day</p>
+                    </div>
+                    <div class="quick-card p-4 rounded-xl shadow-lg cursor-pointer transition hover:shadow-xl" onclick="navigate('map-view')" style="background-color: var(--color-river-blue); color: white;">
+                        <i data-lucide="map" class="w-8 h-8 mb-2" style="color: var(--color-accent-gold);"></i>
+                        <p class="font-semibold text-lg" data-lang-key="smart_navigation">Smart Navigation</p>
+                    </div>
+                    <div class="quick-card p-4 rounded-xl shadow-lg cursor-pointer transition hover:shadow-xl" onclick="navigate('notif-view')" style="background-color: var(--color-river-blue); color: white;">
+                        <i data-lucide="bell" class="w-8 h-8 mb-2" style="color: var(--color-accent-gold);"></i>
+                        <p class="font-semibold text-lg" data-lang-key="my_events">My Events</p>
+                    </div>
+                    <!-- UPDATED: Replaced Chatbot with SOS -->
+                    <div class="quick-card p-4 rounded-xl shadow-lg cursor-pointer transition hover:shadow-xl" onclick="openSOSModal()" style="background-color: var(--color-sos-red); color: white;">
+                        <i data-lucide="siren" class="w-8 h-8 mb-2" style="color: white;"></i>
+                        <p class="font-semibold text-lg" data-lang-key="emergency_sos">Emergency SOS</p>
+                    </div>
+                </div>
+
+                <!-- Live Event Tabs -->
+                <section id="live-events" class="mt-8">
+                    <h2 class="text-2xl font-bold mb-4" style="color: var(--color-river-blue);" data-lang-key="live_updates">Live Updates</h2>
+                    <div class="event-tabs-nav flex justify-around bg-gray-100 rounded-lg p-1">
+                        <button class="event-tab-btn flex-1 p-2 text-sm text-center" onclick="switchEventTab('aarti')" data-lang-key="aartis">Aartis</button>
+                        <button class="event-tab-btn flex-1 p-2 text-sm text-center" onclick="switchEventTab('processions')" data-lang-key="processions">Processions</button>
+                        <button class="event-tab-btn flex-1 p-2 text-sm text-center" onclick="switchEventTab('alerts')" data-lang-key="alerts">Alerts</button>
+                    </div>
+                    <div id="event-tab-content" class="mt-4 space-y-3">
+                        <!-- Content will be dynamically inserted here by JS -->
+                    </div>
+                </section>
+
+                <!-- UPDATED: Floating SOS Button -->
+                <button class="fixed bottom-24 right-8 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center z-20 transition transform hover:scale-105" onclick="openSOSModal()" style="background-color: var(--color-sos-red);">
+                    <i data-lucide="phone-outgoing" class="w-8 h-8 text-white"></i>
+                </button>
+            </section>
+
+            <!-- 2. Personalized Itinerary Planner -->
+            <section id="plan-view" class="view hidden-view">
+                <h2 class="text-2xl font-bold mb-4" style="color: var(--color-river-blue);" data-lang-key="plan_my_day">Plan My Day</h2>
+                <p class="text-gray-600 mb-6" data-lang-key="plan_subtitle">Tell us your preferences to generate a personalized journey.</p>
+
+                <div class="space-y-6 p-4 rounded-xl shadow-inner" style="background-color: var(--color-ashram-white);">
+                    <!-- Form Cards -->
+                    <div class="block">
+                        <span class="text-sm font-medium text-gray-700" data-lang-key="plan_interests">Interests</span>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <input type="checkbox" id="int-spiritual" value="Spiritual" class="hidden peer" checked><label for="int-spiritual" class="interest-chip" data-lang-key="interest_spiritual">Spiritual</label>
+                            <input type="checkbox" id="int-heritage" value="Heritage" class="hidden peer"><label for="int-heritage" class="interest-chip" data-lang-key="interest_heritage">Heritage</label>
+                            <input type="checkbox" id="int-viewpoint" value="Viewpoint" class="hidden peer"><label for="int-viewpoint" class="interest-chip" data-lang-key="interest_viewpoint">Viewpoint</label>
+                            <input type="checkbox" id="int-culture" value="Culture" class="hidden peer"><label for="int-culture" class="interest-chip" data-lang-key="interest_culture">Culture</label>
+                            <input type="checkbox" id="int-accommodation" value="Accommodation" class="hidden peer"><label for="int-accommodation" class="interest-chip" data-lang-key="interest_accommodation">Accommodation</label>
+                            <input type="checkbox" id="int-food" value="Food" class="hidden peer"><label for="int-food" class="interest-chip" data-lang-key="interest_food">Food</label>
+                            <input type="checkbox" id="int-dharmashala" value="Dharamshala" class="hidden peer"><label for="int-dharmashala" class="interest-chip" data-lang-key="interest_dharmashala">Dharamshala</label>
+                            <input type="checkbox" id="int-mahaprasad" value="Maha Prasad" class="hidden peer"><label for="int-mahaprasad" class="interest-chip" data-lang-key="interest_mahaprasad">Maha Prasad</label>
+                        </div>
+                    </div>
+
+                    <div class="block">
+                        <span class="text-sm font-medium text-gray-700" data-lang-key="plan_mobility">Mobility Level</span>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <input type="radio" id="mob-low" name="mobility" value="low" class="hidden peer" checked><label for="mob-low" class="mobility-chip" data-lang-key="mobility_low">Low (Gentle Pace)</label>
+                            <input type="radio" id="mob-moderate" name="mobility" value="moderate" class="hidden peer"><label for="mob-moderate" class="mobility-chip" data-lang-key="mobility_moderate">Moderate (Some Walking)</label>
+                            <input type="radio" id="mob-high" name="mobility" value="high" class="hidden peer"><label for="mob-high" class="mobility-chip" data-lang-key="mobility_high">High (Energetic)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="generate-plan-btn" class="main-button w-full py-3 mt-6 rounded-xl font-bold text-lg" style="background-color: var(--color-saffron);" onclick="generateItinerary()">
+                    <span data-lang-key="generate_plan_btn">✨ Generate My Plan</span>
+                </button>
+
+                <!-- Itinerary Output -->
+                <div id="itinerary-output" class="mt-8">
+                    <h3 class="text-xl font-semibold mb-3" style="color: var(--color-river-blue);" data-lang-key="itinerary_title">Your Suggested Itinerary</h3>
+                    <div id="itinerary-list" class="space-y-4">
+                        <!-- Itinerary items will be dynamically generated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Crowd Prediction & Smart Navigation -->
+            <section id="map-view" class="view hidden-view">
+                <h2 class="text-2xl font-bold mb-4" style="color: var(--color-river-blue);" data-lang-key="smart_navigation_title">Smart Navigation</h2>
+
+                <div class="shadow-lg relative rounded-lg overflow-hidden border-2 border-[var(--color-river-blue)]">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14998.665037096646!2d73.77457784869386!3d20.00192518118809!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bddebabd883bce7%3A0x67c2e987c6b031f!2sRamkund%2C%20Nashik%2C%20Maharashtra%20422003!5e0!3m2!1sen!2sin!4v1729701045952!5m2!1sen!2sin"
+                        width="100%"
+                        height="350"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+
+                <div class="mt-6 p-4 rounded-xl shadow-md" style="background-color: var(--color-ashram-white);">
+                    <p class="font-semibold text-lg mb-2" style="color: var(--color-saffron);" data-lang-key="crowd_status_title">Live Crowd Status</p>
+
+                    <div id="crowd-heatmap" class="h-3 w-full rounded-full bg-gray-200 overflow-hidden flex">
+                        <div id="crowd-low" class="h-full bg-green-500 transition-all duration-1000" style="width: 60%;"></div>
+                        <div id="crowd-mid" class="h-full bg-yellow-500 transition-all duration-1000" style="width: 25%;"></div>
+                        <div id="crowd-high" class="h-full bg-red-500 transition-all duration-1000" style="width: 15%;"></div>
+                    </div>
+                    <p id="crowd-legend" class="text-sm mt-2 text-gray-700" data-lang-key="crowd_status_legend">Areas: 🟢 Calm, 🟡 Moderate (Ramkund), 🔴 Crowded (Sadhugram Gate)</p>
+                </div>
+
+                <button class="main-button w-full py-3 mt-6 rounded-xl font-bold text-lg" onclick="showRoute('ramkund')"> <!-- Changed destination to lowercase ID -->
+                    <i data-lucide="route" class="inline w-5 h-5 mr-2"></i>
+                    <span data-lang-key="smart_route_btn">🛤 Smart Route to Ramkund</span>
+                </button>
+                <div id="route-output" class="mt-4 text-center text-gray-600"></div>
+            </section>
+
+            <!-- 4. Smart Notifications -->
+            <section id="notif-view" class="view hidden-view">
+                <h2 class="text-2xl font-bold mb-4" style="color: var(--color-river-blue);" data-lang-key="notifications_title">Smart Notifications</h2>
+
+                <div class="flex justify-between items-center mb-4 p-3 rounded-xl shadow-sm" style="background-color: var(--color-ashram-white);">
+                    <label for="relevant-toggle" class="font-medium text-gray-700" data-lang-key="notifications_filter">Show only relevant updates</label>
+                    <input type="checkbox" id="relevant-toggle" checked class="h-5 w-5 rounded text-green-500 focus:ring-green-400" onchange="filterNotifications()">
+                </div>
+
+                <div id="notification-feed" class="space-y-3">
+                    <!-- Notification Cards (Populated by JS) -->
+                </div>
+            </section>
+
+            <!-- NEW: 5. Profile View -->
+            <section id="profile-view" class="view hidden-view">
+                <h2 class="text-2xl font-bold mb-4" style="color: var(--color-river-blue);" data-lang-key="profile_title">My Profile</h2>
+                <div class="p-6 bg-white rounded-xl shadow-md text-center">
+                    <img src="https://placehold.co/100x100/457B9D/FFFFFF?text=User" alt="Profile Picture" class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-[var(--color-saffron)]">
+                    <h3 class="text-xl font-semibold text-gray-800">Devotee User</h3> 
+                   
+                    <p class="text-gray-500" data-lang-key="profile_subtitle">Nashik, Maharashtra</p>
+                    
+                    <div class="mt-6 text-left space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700" data-lang-key="profile_lang_label">Preferred Language</label>
+                            <p class="text-lg font-semibold text-gray-900" id="profile-lang-display">English</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700" data-lang-key="profile_saved_label">Saved Events</label>
+                            <p class="text-gray-500" data-lang-key="profile_saved_empty">No saved events yet.</p>
+                            <!-- Add saved events list here later -->
+                        </div>
+                    </div>
+
+                    <button class="main-button w-full py-3 mt-8 rounded-xl font-bold text-lg" style="background-color: var(--color-sos-red);">
+                        
+                        <a data-lang-key="profile_logout_btn" href="login1.html" >log out</a>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Custom Modal for Alerts (replacing alert()) -->
+            <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+                <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm mx-auto text-center w-full">
+                    <h3 id="modal-title" class="text-xl font-bold mb-2" style="color: var(--color-river-blue);"></h3>
+                    <p id="modal-message" class="text-gray-700 mb-6"></p>
+                    <button class="px-5 py-2 rounded-lg text-white font-semibold" style="background-color: var(--color-river-blue);" onclick="closeModal()" data-lang-key="modal_close_btn">Close</button>
+                </div>
+            </div>
+
+            <!-- NEW: Emergency SOS Modal -->
+            <div id="sos-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+                <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm mx-auto w-full">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-bold text-red-600" data-lang-key="sos_title">Emergency Help</h3>
+                        <button onclick="closeSOSModal()" class="p-1 rounded-full hover:bg-gray-100">
+                            <i data-lucide="x" class="w-6 h-6 text-gray-500"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-700 mb-6" data-lang-key="sos_subtitle">Tap a number to call for immediate assistance.</p>
+                    <div class="space-y-4">
+                        <a href="tel:100" class="block w-full text-left p-4 rounded-lg bg-red-100 border border-red-300 transition hover:bg-red-200">
+                            <p class="font-bold text-lg text-red-700" data-lang-key="sos_police">Police Control Room</p>
+                            <p class="font-semibold text-2xl text-red-900">100</p>
+                        </a>
+                        <a href="tel:108" class="block w-full text-left p-4 rounded-lg bg-blue-100 border border-blue-300 transition hover:bg-blue-200">
+                            <p class="font-bold text-lg text-blue-700" data-lang-key="sos_ambulance">Ambulance / Medical</p>
+                            <p class="font-semibold text-2xl text-blue-900">108</p>
+                        </a>
+                        <a href="tel:101" class="block w-full text-left p-4 rounded-lg bg-yellow-100 border border-yellow-300 transition hover:bg-yellow-200">
+                            <p class="font-bold text-lg text-yellow-700" data-lang-key="sos_fire">Fire Brigade</p>
+                            <p class="font-semibold text-2xl text-yellow-900">101</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Fixed Bottom Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-xl max-w-md mx-auto z-10">
+            <div class="flex justify-around">
+                <button class="nav-item flex flex-col items-center p-3 text-gray-500 hover:text-orange-500" data-view="home-view" onclick="navigate('home-view')">
+                    <i data-lucide="home" class="w-6 h-6"></i>
+                    <span class="text-xs" data-lang-key="nav_home">Home</span>
+                </button>
+                <button class="nav-item flex flex-col items-center p-3 text-gray-500 hover:text-orange-500" data-view="plan-view" onclick="navigate('plan-view')">
+                    <i data-lucide="calendar" class="w-6 h-6"></i>
+                    <span class="text-xs" data-lang-key="nav_plan">Plan</span>
+                </button>
+                <button class="nav-item flex flex-col items-center p-3 text-gray-500 hover:text-orange-500" data-view="map-view" onclick="navigate('map-view')">
+                    <i data-lucide="map" class="w-6 h-6"></i>
+                    <span class="text-xs" data-lang-key="nav_navigate">Navigate</span>
+                </button>
+                <button class="nav-item flex flex-col items-center p-3 text-gray-500 hover:text-red-500" onclick="openSOSModal()">
+                    <i data-lucide="siren" class="w-6 h-6"></i>
+                    <span class="text-xs" data-lang-key="nav_sos">SOS</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // --- DATA AND STATE MANAGEMENT ---
+        let currentLang = 'en';
+
+        const UI_TEXT = {
+            en: {
+                welcome_subtitle: 'Your AI-guided Kumbh journey starts here.',
+                plan_my_day: 'Plan My Day',
+                smart_navigation: 'Smart Navigation',
+                my_events: 'My Events',
+                emergency_sos: 'Emergency SOS',
+                live_updates: 'Live Updates',
+                aartis: 'Aartis',
+                processions: 'Processions',
+                alerts: 'Alerts',
+                nav_home: 'Home',
+                nav_plan: 'Plan',
+                nav_navigate: 'Navigate',
+                nav_sos: 'SOS',
+                lang_switched: 'Language switched to English.',
+                plan_subtitle: 'Tell us your preferences to generate a personalized journey.',
+                plan_interests: 'Interests',
+                interest_spiritual: 'Spiritual',
+                interest_heritage: 'Heritage',
+                interest_viewpoint: 'Viewpoint',
+                interest_culture: 'Culture',
+                interest_accommodation: 'Accommodation',
+                interest_food: 'Food',
+                interest_dharmashala: 'Dharamshala',
+                interest_mahaprasad: 'Maha Prasad',
+                plan_mobility: 'Mobility Level',
+                mobility_low: 'Low (Gentle Pace)',
+                mobility_moderate: 'Moderate (Some Walking)',
+                mobility_high: 'High (Energetic)',
+                generate_plan_btn: '✨ Generate My Plan',
+                itinerary_title: 'Your Suggested Itinerary',
+                itinerary_empty: 'No locations match your preferences. Please adjust your filters.',
+                itinerary_generated: 'Plan generated!',
+                crowd_low: 'Low',
+                crowd_moderate: 'Moderate',
+                crowd_high: 'High',
+                details_button: 'Details',
+                location_button: 'Location',
+                smart_navigation_title: 'Smart Navigation',
+                crowd_status_title: 'Live Crowd Status',
+                crowd_status_legend: 'Areas: 🟢 Calm, 🟡 Moderate (Ramkund), 🔴 Crowded (Sadhugram Gate)',
+                smart_route_btn: '🛤 Smart Route to Ramkund',
+                route_calculated: 'Smart Route Calculated!',
+                route_text_ramkund: 'Go via Sector B, avoiding Ramkund bridge congestion (🔴). Estimated time: 15 mins.', // Example route text
+                notifications_title: 'Smart Notifications',
+                notifications_filter: 'Show only relevant updates',
+                notifications_filter_on: 'Showing only relevant updates.',
+                notifications_filter_off: 'Showing all announcements.',
+                modal_close_btn: 'Close',
+                sos_title: 'Emergency Help',
+                sos_subtitle: 'Tap a number to call for immediate assistance.',
+                sos_police: 'Police Control Room',
+                sos_ambulance: 'Ambulance / Medical',
+                sos_fire: 'Fire Brigade',
+                profile_title: 'My Profile',
+                profile_subtitle: 'Nashik, Maharashtra',
+                profile_lang_label: 'Preferred Language',
+                profile_saved_label: 'Saved Events',
+                profile_saved_empty: 'No saved events yet.',
+                profile_logout_btn: 'Log Out'
+            },
+            hi: {
+                welcome_subtitle: 'आपकी AI-निर्देशित कुंभ यात्रा यहाँ से शुरू होती है।',
+                plan_my_day: 'दिन की योजना',
+                smart_navigation: 'स्मार्ट नेविगेशन',
+                my_events: 'मेरे कार्यक्रम',
+                emergency_sos: 'आपातकालीन एसओएस',
+                live_updates: 'लाइव अपडेट',
+                aartis: 'आरती',
+                processions: 'जुलूस',
+                alerts: 'चेतावनी',
+                nav_home: 'होम',
+                nav_plan: 'योजना',
+                nav_navigate: 'नेविगेट',
+                nav_sos: 'एसओएस',
+                lang_switched: 'भाषा बदलकर हिन्दी कर दी गई है।',
+                plan_subtitle: 'व्यक्तिगत यात्रा बनाने के लिए हमें अपनी प्राथमिकताएँ बताएँ।',
+                plan_interests: 'रुचियाँ',
+                interest_spiritual: 'आध्यात्मिक',
+                interest_heritage: 'विरासत',
+                interest_viewpoint: 'व्यूपॉइंट',
+                interest_culture: 'संस्कृति',
+                interest_accommodation: 'आवास',
+                interest_food: 'भोजन',
+                interest_dharmashala: 'धर्मशाला',
+                interest_mahaprasad: 'महा प्रसाद',
+                plan_mobility: 'गतिशीलता स्तर',
+                mobility_low: 'कम (धीमी गति)',
+                mobility_moderate: 'मध्यम (थोड़ा चलना)',
+                mobility_high: 'उच्च (ऊर्जावान)',
+                generate_plan_btn: '✨ मेरी योजना बनाएँ',
+                itinerary_title: 'आपकी सुझाई गई यात्रा योजना',
+                itinerary_empty: 'आपकी प्राथमिकताओं से मेल खाने वाला कोई स्थान नहीं मिला। कृपया अपने फ़िल्टर समायोजित करें।',
+                itinerary_generated: 'योजना बन गई!',
+                crowd_low: 'कम',
+                crowd_moderate: 'मध्यम',
+                crowd_high: 'अधिक',
+                details_button: 'विवरण',
+                location_button: 'स्थान',
+                smart_navigation_title: 'स्मार्ट नेविगेशन',
+                crowd_status_title: 'लाइव भीड़ की स्थिति',
+                crowd_status_legend: 'क्षेत्र: 🟢 शांत, 🟡 मध्यम (रामकुंड), 🔴 भीड़ (साधुग्राम गेट)',
+                smart_route_btn: '🛤 रामकुंड के लिए स्मार्ट रूट',
+                route_calculated: 'स्मार्ट रूट की गणना की गई!',
+                 route_text_ramkund: 'सेक्टर बी से जाएं, रामकुंड पुल पर भीड़ (🔴) से बचें। अनुमानित समय: 15 मिनट।',
+                notifications_title: 'स्मार्ट सूचनाएं',
+                notifications_filter: 'केवल प्रासंगिक अपडेट दिखाएं',
+                notifications_filter_on: 'केवल प्रासंगिक अपडेट दिखाए जा रहे हैं।',
+                notifications_filter_off: 'सभी घोषणाएं दिखाई जा रही हैं।',
+                modal_close_btn: 'बंद करें',
+                sos_title: 'आपातकालीन सहायता',
+                sos_subtitle: 'तत्काल सहायता के लिए एक नंबर पर टैप करें।',
+                sos_police: 'पुलिस नियंत्रण कक्ष',
+                sos_ambulance: 'एम्बुलेंस / चिकित्सा',
+                sos_fire: 'दमकल',
+                profile_title: 'मेरी प्रोफ़ाइल',
+                profile_subtitle: 'नाशिक, महाराष्ट्र',
+                profile_lang_label: ' पसंदीदा भाषा',
+                profile_saved_label: 'सहेजे गए कार्यक्रम',
+                profile_saved_empty: 'अभी तक कोई सहेजे गए कार्यक्रम नहीं हैं।',
+                profile_logout_btn: 'लॉग आउट'
+            },
+            mr: {
+                welcome_subtitle: 'तुमचा AI-मार्गदर्शित कुंभ प्रवास येथून सुरू होतो.',
+                plan_my_day: 'दिवसाची योजना',
+                smart_navigation: 'स्मार्ट नेव्हिगेशन',
+                my_events: 'माझे कार्यक्रम',
+                emergency_sos: 'आणीबाणी एसओएस',
+                live_updates: 'थेट अद्यतने',
+                aartis: 'आरत्या',
+                processions: 'मिरवणुका',
+                alerts: 'सूचना',
+                nav_home: 'होम',
+                nav_plan: 'योजना',
+                nav_navigate: 'नेव्हिगेट',
+                nav_sos: 'एसओएस',
+                lang_switched: 'भाषा मराठीत बदलली आहे.',
+                plan_subtitle: 'वैयक्तिकृत प्रवास तयार करण्यासाठी आम्हाला तुमच्या प्राधान्यांबद्दल सांगा.',
+                plan_interests: 'आवडी',
+                interest_spiritual: 'आध्यात्मिक',
+                interest_heritage: 'वारसा',
+                interest_viewpoint: 'व्ह्यूपॉइंट',
+                interest_culture: 'संस्कृती',
+                interest_accommodation: 'निवास',
+                interest_food: 'जेवण',
+                interest_dharmashala: 'धर्मशाळा',
+                interest_mahaprasad: 'महा प्रसाद',
+                plan_mobility: 'गतिशीलता पातळी',
+                mobility_low: 'कमी (हळू चाल)',
+                mobility_moderate: 'मध्यम (थोडे चालणे)',
+                mobility_high: 'उच्च (उत्साही)',
+                generate_plan_btn: '✨ माझी योजना तयार करा',
+                itinerary_title: 'तुमची सुचवलेली यात्रा योजना',
+                itinerary_empty: 'तुमच्या प्राधान्यांशी जुळणारी कोणतीही ठिकाणे आढळली नाहीत. कृपया तुमचे फिल्टर समायोजित करा.',
+                itinerary_generated: 'योजना तयार झाली!',
+                crowd_low: 'कमी',
+                crowd_moderate: 'मध्यम',
+                crowd_high: 'जास्त',
+                details_button: 'तपशील',
+                location_button: 'ठिकाण',
+                smart_navigation_title: 'स्मार्ट नेव्हिगेशन',
+                crowd_status_title: 'थेट गर्दीची स्थिती',
+                crowd_status_legend: 'क्षेत्रे: 🟢 शांत, 🟡 मध्यम (रामकुंड), 🔴 गर्दी (साधुग्राम गेट)',
+                smart_route_btn: '🛤 रामकुंडसाठी स्मार्ट मार्ग',
+                route_calculated: 'स्मार्ट मार्गाची गणना झाली!',
+                route_text_ramkund: 'सेक्टर बी मार्गे जा, रामकुंड पुलावरील गर्दी (🔴) टाळा. अंदाजे वेळ: १५ मिनिटे.',
+                notifications_title: 'स्मार्ट सूचना',
+                notifications_filter: 'फक्त संबंधित अद्यतने दर्शवा',
+                notifications_filter_on: 'फक्त संबंधित अद्यतने दर्शवित आहे.',
+                notifications_filter_off: 'सर्व घोषणा दर्शवित आहे.',
+                modal_close_btn: 'बंद करा',
+                sos_title: 'आणीबाणी मदत',
+                sos_subtitle: 'तातडीच्या मदतीसाठी नंबरवर टॅप करा.',
+                sos_police: 'पोलीस नियंत्रण कक्ष',
+                sos_ambulance: 'रुग्णवाहिका / वैद्यकीय',
+                sos_fire: 'अग्निशमन दल',
+                profile_title: 'माझी प्रोफाइल',
+                profile_subtitle: 'नाशिक, महाराष्ट्र',
+                profile_lang_label: 'पसंतीची भाषा',
+                profile_saved_label: 'सेव्ह केलेले इव्हेंट',
+                profile_saved_empty: 'अद्याप कोणतेही इव्हेंट सेव्ह केलेले नाहीत.',
+                profile_logout_btn: 'लॉग आउट'
+            }
+        };
+
+        const MOCK_LOCATIONS = [
+            { id: 'ramkund', name_en: 'Ramkund Ghat', name_hi: 'रामकुंड घाट', name_mr: 'रामकुंड घाट', details_en: 'The holiest spot in Nashik, where Lord Rama is believed to have bathed. Central to all Kumbh Mela activities.', details_hi: 'नाशिक का सबसे पवित्र स्थान, जहाँ माना जाता है कि भगवान राम ने स्नान किया था। कुंभ मेले की सभी गतिविधियों का केंद्र।', details_mr: 'नाशिकमधील सर्वात पवित्र स्थान, जेथे भगवान रामाने स्नान केल्याचे मानले जाते. कुंभमेळ्याच्या सर्व उपक्रमांचे केंद्र.', type: 'ghat', tags: ['Spiritual', 'Heritage'], mobility: 'low', crowd: 'high', lat: 20.0080653, lng: 73.7919993, rating: 4.8 },
+            { id: 'kalaram', name_en: 'Kalaram Temple', name_hi: 'काळाराम मंदिर', name_mr: 'काळाराम मंदिर', details_en: 'A famous temple dedicated to Lord Rama, built from black stone. Known for its impressive architecture and spiritual significance.', details_hi: 'काळ्या पाषाणातून बनवलेले भगवान रामाला समर्पित एक प्रसिद्ध मंदिर. प्रभावी वास्तुकला आणि आध्यात्मिक महत्त्वासाठी ओळखले जाते।', details_mr: 'भगवान रामाला समर्पित एक प्रसिद्ध मंदिर, जे काळ्या दगडापासून बनलेले आहे. प्रभावी वास्तुकला आणि आध्यात्मिक महत्त्वासाठी ओळखले जाते.', type: 'temple', tags: ['Spiritual', 'Heritage', 'Culture'], mobility: 'moderate', crowd: 'moderate', lat: 20.0088, lng: 73.7865, rating: 4.7 },
+            { id: 'sita_gufa', name_en: 'Sita Gufa (Cave)', name_hi: 'सीता गुफा', name_mr: 'सीता गुफा', details_en: 'A narrow cave near Kalaram Temple, believed to be the spot where Sita stayed during her exile. Requires crawling to enter.', details_hi: 'काळाराम मंदिराजवळील एक अरुंद गुहा, जिथे सीतेने वनवासात वास्तव्य केल्याचे मानले जाते. आत जाण्यासाठी रांगावे लागते।', details_mr: 'काळाराम मंदिराजवळील एक अरुंद गुहा, जिथे सीतेने वनवासात वास्तव्य केल्याचे मानले जाते. आत जाण्यासाठी रांगावे लागते.', type: 'temple', tags: ['Spiritual', 'Heritage'], mobility: 'high', crowd: 'high', lat: 20.0083, lng: 73.7863, rating: 4.5 },
+            { id: 'tapovan', name_en: 'Tapovan', name_hi: 'तपोवन', name_mr: 'तपोवन', details_en: 'A serene area with lush greenery, believed to be a place of meditation for sages. A bit further from the main ghats, offering peace.', details_hi: 'हरियाली से भरा एक शांत क्षेत्र, जिसे ऋषियों का ध्यान स्थान माना जाता है। मुख्य घाटों से थोड़ा दूर, शांति प्रदान करता है।', details_mr: 'हिरवळीने भरलेला एक शांत परिसर, जो ऋषीमुनींचा ध्यान करण्याचा स्थान मानला जातो. मुख्य घाटांपासून थोडे दूर, शांती देणारे ठिकाण.', type: 'viewpoint', tags: ['Spiritual', 'Viewpoint'], mobility: 'moderate', crowd: 'low', lat: 20.0095, lng: 73.8055, rating: 4.4 },
+            { id: 'sadhugram', name_en: 'Sadhugram', name_hi: 'साधुग्राम', name_mr: 'साधुग्राम', details_en: 'The sprawling camp city set up for the Sadhus and Akharas. A cultural hotspot to witness the diverse Naga Babas and ascetics.', details_hi: 'साधुओं और अखाड़ों के लिए बसाया गया विशाल शिविर शहर। विभिन्न नागा बाबाओं और तपस्वियों को देखने के लिए एक सांस्कृतिक हॉटस्पॉट।', details_mr: 'साधू आणि आखाड्यांसाठी वसवलेले विशाल शिबिर शहर. विविध नागा बाबा आणि तपस्वींना पाहण्यासाठी एक सांस्कृतिक हॉटस्पॉट.', type: 'event', tags: ['Culture', 'Heritage', 'Viewpoint'], mobility: 'high', crowd: 'moderate', lat: 20.0150, lng: 73.8010, rating: 4.2 },
+            { id: 'gajanan_dharmashala', name_en: 'Gajanan Maharaj Dharmashala', name_hi: 'गजानन महाराज धर्मशाला', name_mr: 'गजानन महाराज धर्मशाळा', details_en: 'A popular dharmashala providing affordable lodging for pilgrims near Panchavati.', details_hi: 'पंचवटी के पास तीर्थयात्रियों के लिए किफायती आवास प्रदान करने वाली एक लोकप्रिय धर्मशाला।', details_mr: 'पंचवटीजवळ भाविकांसाठी माफक दरात निवासाची सोय उपलब्ध करून देणारी लोकप्रिय धर्मशाळा.', type: 'accommodation', tags: ['Accommodation', 'Dharamshala'], mobility: 'low', crowd: 'moderate', lat: 20.0075, lng: 73.7880, rating: 4.3 },
+            { id: 'kalaram_prasad', name_en: 'Kalaram Mandir Prasad', name_hi: 'काळाराम मंदिर प्रसाद', name_mr: 'काळाराम मंदिर प्रसाद', details_en: 'Official Maha Prasad distribution point at Kalaram Temple. Usually starts after noon aarti.', details_hi: 'काळाराम मंदिर में आधिकारिक महा प्रसाद वितरण केंद्र। आमतौर पर दोपहर की आरती के बाद शुरू होता है।', details_mr: 'काळाराम मंदिरातील अधिकृत महाप्रसाद वितरण केंद्र. साधारणपणे दुपारच्या आरतीनंतर सुरू होते.', type: 'food', tags: ['Food', 'Spiritual', 'Maha Prasad'], mobility: 'moderate', crowd: 'high', lat: 20.0089, lng: 73.7866, rating: 4.6 },
+            { id: 'hotel_panchavati', name_en: 'Hotel Panchavati Yatri', name_hi: 'होटल पंचवटी यात्री', name_mr: 'हॉटेल पंचवटी यात्री', details_en: 'A well-known hotel offering comfortable rooms and modern amenities, very close to the main temple complex.', details_hi: 'मुख्य मंदिर परिसर के बहुत करीब, आरामदायक कमरे और आधुनिक सुविधाएं प्रदान करने वाला एक प्रसिद्ध होटल।', details_mr: 'मुख्य मंदिर संकुलाच्या अगदी जवळ, आरामदायी खोल्या आणि आधुनिक सुविधा देणारे एक प्रसिद्ध हॉटेल.', type: 'accommodation', tags: ['Accommodation'], mobility: 'low', crowd: 'low', lat: 20.0060, lng: 73.7850, rating: 4.1 }
+            // Removed trailing comma here
+        ];
+
+        const MOCK_LIVE_EVENTS = {
+            aarti: [
+                { name: 'Godavari Aarti', location: 'Ramkund', status: 'Ongoing', statusColor: 'text-green-600' },
+                { name: 'Panchavati Aarti', location: 'Sita Gufa', status: 'Starts in 15 mins', statusColor: 'text-yellow-600' },
+            ],
+            processions: [
+                { name: 'Juna Akhara Peshwai', location: 'Tapovan Road', status: 'In Progress', statusColor: 'text-green-600' },
+                { name: 'Nirmohi Akhara Procession', location: 'Sadhugram Gate 3', status: 'Upcoming at 4 PM', statusColor: 'text-blue-600' }
+            ],
+            alerts: [
+                { name: 'High Crowd Alert', location: 'Ramkund Bridge', status: 'Route congested. Use alternate path.', statusColor: 'text-red-600' },
+                { name: 'Weather Update', location: 'General', status: 'Light showers expected post 6 PM.', statusColor: 'text-blue-600' }
+            ]
+        };
+
+        const MOCK_NOTIFICATIONS = [
+            { text: "🌅 Morning Snan begins at Panchavati Ghat – crowd low now.", relevant: true, tags: ["Spiritual"], time: "5 min ago" },
+            { text: "🚨 Urgent: Tapovan Bridge temporarily closed due to high density. Use alternate route D-4.", relevant: true, tags: ["Safety"], time: "15 min ago" },
+            { text: "🍛 Maha Prasad distribution has started at Kalaram Temple.", relevant: false, tags: ["Food", "Maha Prasad"], time: "30 min ago" },
+        ];
+
+        let currentView = 'home-view';
+
+        // --- LANGUAGE & LOCALIZATION ---
+        function switchLanguage(lang) {
+            currentLang = lang;
+            const translations = UI_TEXT[lang];
+
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (translations[key]) {
+                    el.textContent = translations[key];
+                }
+            });
+
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.lang-btn:nth-child(${['en','hi','mr'].indexOf(lang)+1})`).classList.add('active');
+
+            const activeTabButton = document.querySelector('.event-tab-btn.active');
+            const activeTabName = activeTabButton ? activeTabButton.getAttribute('onclick').match(/'([^']*)'/)[1] : 'aarti';
+            renderLiveEvents(activeTabName);
+            renderNotifications();
+            generateItinerary(true);
+
+            // NEW: Update profile language display
+            const langDisplay = document.getElementById('profile-lang-display');
+            if (langDisplay) {
+                if (lang === 'en') langDisplay.textContent = 'English';
+                else if (lang === 'hi') langDisplay.textContent = 'हिन्दी';
+                else if (lang === 'mr') langDisplay.textContent = 'मराठी';
+            }
+
+            showModal(UI_TEXT[currentLang].lang_switched);
+            
+        }
+
+        // --- CORE NAVIGATION ---
+        function navigate(viewId) {
+            document.querySelectorAll('.view').forEach(view => view.classList.add('hidden-view'));
+            const targetView = document.getElementById(viewId);
+            if (targetView) {
+                targetView.classList.remove('hidden-view');
+                currentView = viewId;
+            }
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('header-active');
+                item.style.color = 'gray';
+                const itemView = item.getAttribute('data-view');
+                if (itemView === viewId) {
+                    item.classList.add('header-active');
+                    item.style.color = 'var(--color-saffron)';
+                } else if (!itemView) {
+                     item.style.color = item.getAttribute('onclick') === 'openSOSModal()' ? 'gray' : 'gray';
+                }
+            });
+            const sosNav = document.querySelector('.nav-item[onclick="openSOSModal()"]');
+             if (sosNav && currentView !== 'sos-modal') sosNav.style.color = 'gray';
+
+            lucide.createIcons();
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        function showModal(title, message = "") {
+            if (!message) {
+                message = title;
+                title = "";
+            }
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('custom-modal').classList.remove('hidden');
+            document.getElementById('custom-modal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+            document.getElementById('custom-modal').classList.remove('flex');
+        }
+
+        function openSOSModal() {
+            document.getElementById('sos-modal').classList.remove('hidden');
+            document.getElementById('sos-modal').classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeSOSModal() {
+            document.getElementById('sos-modal').classList.add('hidden');
+            document.getElementById('sos-modal').classList.remove('flex');
+        }
+
+        function openMap(lat, lng) {
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+        }
+
+        // --- HOME SCREEN LOGIC ---
+        function switchEventTab(tabName) {
+            document.querySelectorAll('.event-tab-btn').forEach(btn => btn.classList.remove('active'));
+            const clickedButton = Array.from(document.querySelectorAll('.event-tab-btn')).find(btn => btn.getAttribute('onclick').includes(`'${tabName}'`));
+            if(clickedButton) clickedButton.classList.add('active');
+            renderLiveEvents(tabName);
+        }
+
+        function renderLiveEvents(category) {
+            const contentEl = document.getElementById('event-tab-content');
+            contentEl.innerHTML = '';
+            const events = MOCK_LIVE_EVENTS[category] || [];
+
+            if (events.length === 0) {
+                contentEl.innerHTML = `<p class="text-center text-gray-500 p-4">No live updates for this category.</p>`;
+                return;
+            }
+
+            events.forEach(event => {
+                let bgColor = 'bg-yellow-500';
+                if (event.statusColor.includes('red')) bgColor = 'bg-red-500';
+                else if (event.statusColor.includes('green')) bgColor = 'bg-green-500';
+                else if (event.statusColor.includes('blue')) bgColor = 'bg-blue-500';
+
+                const cardHtml = `
+                <div class="live-event-card bg-white p-3 rounded-lg shadow flex items-center gap-4">
+                    <div class="flex-shrink-0 w-2 h-10 rounded-full ${bgColor}"></div>
+                    <div class="flex-grow">
+                        <p class="font-semibold text-gray-800">${event.name}</p>
+                        <p class="text-xs text-gray-500">${event.location}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-sm ${event.statusColor}">${event.status}</p>
+                    </div>
+                </div>
+                `;
+                contentEl.innerHTML += cardHtml;
+            });
+        }
+
+        // --- ITINERARY PLANNER LOGIC ---
+        function generateItinerary(isSilent = false) {
+            try { // Added try...catch for better error handling
+                const mobility = document.querySelector('input[name="mobility"]:checked').value;
+                const selectedInterests = Array.from(document.querySelectorAll('input[id^="int-"]:checked')).map(cb => cb.value);
+
+                let itinerary = MOCK_LOCATIONS.filter(loc => {
+                    let mobilityMatch = false;
+                    if (mobility === 'low') {
+                        mobilityMatch = loc.mobility === 'low';
+                    } else if (mobility === 'moderate') {
+                        mobilityMatch = loc.mobility === 'low' || loc.mobility === 'moderate';
+                    } else if (mobility === 'high') {
+                        mobilityMatch = true;
+                    }
+
+                    const interestMatch = loc.tags.some(tag => selectedInterests.includes(tag));
+                    return mobilityMatch && interestMatch;
+                });
+
+                const crowdPriority = { 'low': 1, 'moderate': 2, 'high': 3 };
+                itinerary.sort((a, b) => {
+                    if (mobility === 'low') {
+                        const crowdA = crowdPriority[a.crowd] ?? 99;
+                        const crowdB = crowdPriority[b.crowd] ?? 99;
+                        if (crowdA !== crowdB) {
+                            return crowdA - crowdB;
+                        }
+                    }
+                    return (b.rating ?? 0) - (a.rating ?? 0);
+                });
+
+                const itineraryListEl = document.getElementById('itinerary-list');
+                itineraryListEl.innerHTML = '';
+
+                if (itinerary.length === 0) {
+                    itineraryListEl.innerHTML = `<p class="text-gray-500 text-center p-4">${UI_TEXT[currentLang].itinerary_empty}</p>`;
+                    return;
+                }
+
+                itinerary.forEach(item => {
+                    const crowdKey = `crowd_${item.crowd}`;
+                    const crowdText = UI_TEXT[currentLang][crowdKey] || item.crowd;
+                    const crowdColor = item.crowd === 'low' ? 'text-green-600' : (item.crowd === 'moderate' ? 'text-yellow-600' : 'text-red-600');
+                    const crowdDot = item.crowd === 'low' ? '🟢' : (item.crowd === 'moderate' ? '🟡' : '🔴');
+
+                    const name = item['name_' + currentLang] || item.name_en;
+                    const details = item['details_' + currentLang] || item.details_en;
+
+                    itineraryListEl.innerHTML += `
+                        <div class="event-card bg-white p-4 rounded-xl shadow-md border-l-4" style="border-left-color: var(--color-saffron);">
+                            <div class="flex justify-between items-start gap-2">
+                                <p class="font-bold text-lg text-gray-800 flex-1">${name}</p>
+                                <i data-lucide="heart" class="w-5 h-5 text-gray-400 cursor-pointer hover:text-red-500 transition flex-shrink-0" onclick="showModal('Event Saved!')"></i>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">
+                                <span class="${crowdColor} font-semibold">${crowdDot} ${crowdText}</span>
+                                | <span class="font-medium">${item.rating} ★</span>
+                            </p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <button class="text-sm px-4 py-2 rounded-full text-white font-semibold flex items-center" style="background-color: var(--color-river-blue);" onclick="showDetails('${item.id}')">
+                                    <i data-lucide="info" class="inline w-4 h-4 mr-1"></i>
+                                    ${UI_TEXT[currentLang].details_button}
+                                </button>
+                                <button class="text-sm px-4 py-2 rounded-full text-white font-semibold flex items-center" style="background-color: var(--color-saffron);" onclick="openMap('${item.lat}', '${item.lng}')">
+                                     <i data-lucide="map-pin" class="inline w-4 h-4 mr-1"></i>
+                                    ${UI_TEXT[currentLang].location_button}
+                                </button>
+                            </div>
+                        </div>`;
+                });
+                lucide.createIcons();
+                if (!isSilent) {
+                     const message = `${itinerary.length} ${itinerary.length === 1 ? 'location' : 'locations'} found.`;
+                    showModal(UI_TEXT[currentLang].itinerary_generated, message);
+                }
+            } catch (error) { // Catch potential errors
+                 console.error("Error generating itinerary:", error);
+                 // Show a user-friendly error message in the modal
+                 showModal("Error", "Could not generate itinerary. Please try again or check console for details.");
+                 // Optionally clear the list or show an error state
+                 const itineraryListEl = document.getElementById('itinerary-list');
+                 itineraryListEl.innerHTML = `<p class="text-red-500 text-center p-4">Error loading itinerary.</p>`;
+            }
+        }
+
+
+        // Show details in modal
+        function showDetails(locationId) {
+            const location = MOCK_LOCATIONS.find(loc => loc.id === locationId);
+            if (location) {
+                const title = location['name_' + currentLang] || location.name_en;
+                // --- FIX ---
+                // Removed the stray 'm' from the line below
+                const details = location['details_' + currentLang] || location.details_en;
+                // --- END FIX ---
+                showModal(title, details);
+            }
+        }
+
+        // --- SMART NAVIGATION LOGIC ---
+        function showRoute(destination) {
+            const targetLocation = MOCK_LOCATIONS.find(loc => loc.id === destination.toLowerCase());
+            const routeMsg = UI_TEXT[currentLang].route_calculated;
+            const routeTextKey = `route_text_${destination.toLowerCase()}`;
+            const defaultRouteText = `Go via Sector B, avoiding Ramkund bridge congestion (🔴). Time: 15 mins.`;
+            const routeDetails = UI_TEXT[currentLang][routeTextKey] || defaultRouteText;
+
+            document.getElementById('route-output').innerHTML = `<p class="font-bold text-green-600">${routeMsg}</p><p>${routeDetails}</p>`;
+
+            showModal(UI_TEXT[currentLang].smart_navigation_title, `${routeMsg} Opening Google Maps...`);
+
+            if (targetLocation) {
+                openMap(targetLocation.lat, targetLocation.lng);
+            } else {
+                 console.error("Could not find location for routing:", destination);
+                 showModal("Error", "Could not find map data for this destination.");
+            }
+        }
+
+        // --- NOTIFICATIONS LOGIC ---
+        function renderNotifications() {
+            const feedEl = document.getElementById('notification-feed');
+            const onlyRelevant = document.getElementById('relevant-toggle').checked;
+            feedEl.innerHTML = '';
+            let notifications = onlyRelevant ? MOCK_NOTIFICATIONS.filter(n => n.relevant) : MOCK_NOTIFICATIONS;
+            notifications.forEach(notif => {
+                let borderColor = 'border-blue-500';
+                if (notif.tags.includes("Safety")) borderColor = 'border-red-500';
+                else if (notif.tags.includes("Food") || notif.tags.includes("Maha Prasad")) borderColor = 'border-yellow-500';
+                else if (notif.tags.includes("Spiritual")) borderColor = 'border-green-500';
+
+                feedEl.innerHTML += `
+                    <div class="p-4 rounded-xl shadow-sm bg-white border-l-4 ${borderColor}">
+                        <p class="text-sm text-gray-800">${notif.text}</p>
+                        <p class="text-xs text-gray-400 mt-1">${notif.time}</p>
+                    </div>`;
+            });
+        }
+        function filterNotifications() {
+            renderNotifications();
+            const msgKey = document.getElementById('relevant-toggle').checked ? 'notifications_filter_on' : 'notifications_filter_off';
+            showModal(UI_TEXT[currentLang].notifications_title, UI_TEXT[currentLang][msgKey]);
+        }
+
+        // --- DYNAMIC CROWD LOGIC ---
+        function startLiveCrowdUpdates() {
+            const lowBar = document.getElementById('crowd-low');
+            const midBar = document.getElementById('crowd-mid');
+            const highBar = document.getElementById('crowd-high');
+            const legend = document.getElementById('crowd-legend');
+
+             if (!lowBar || !midBar || !highBar || !legend) {
+                 console.error("Crowd bar elements not found.");
+                 return;
+             }
+
+            setInterval(() => {
+                let low = Math.random() * 50 + 30;
+                let mid = Math.random() * 30 + 10;
+                let high = Math.random() * 20 + 5;
+
+                const total = low + mid + high;
+                const lowPercent = (low / total) * 100;
+                const midPercent = (mid / total) * 100;
+                const highPercent = (high / total) * 100;
+
+                lowBar.style.width = `${lowPercent}%`;
+                midBar.style.width = `${midPercent}%`;
+                highBar.style.width = `${highPercent}%`;
+
+                 const lowText = UI_TEXT[currentLang].crowd_low || 'Low';
+                 const midText = UI_TEXT[currentLang].crowd_moderate || 'Moderate';
+                 const highText = UI_TEXT[currentLang].crowd_high || 'High';
+                let newLegendText = `🟢 ${Math.round(lowPercent)}% ${lowText}, 🟡 ${Math.round(midPercent)}% ${midText}, 🔴 ${Math.round(highPercent)}% ${highText}`;
+                legend.textContent = newLegendText;
+
+            }, 4000);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            switchLanguage('en');
+            navigate('home-view');
+            switchEventTab('aarti');
+            renderNotifications();
+            generateItinerary(true);
+            startLiveCrowdUpdates();
+            lucide.createIcons();
+        };
+
+    </script>
+</body>
+</html>
+

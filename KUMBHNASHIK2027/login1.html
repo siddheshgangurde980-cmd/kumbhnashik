@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Use Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom style for the message box */
+        #messageBox {
+            display: none; /* Hidden by default */
+            transition: all 0.3s ease;
+        }
+        /* Style for Google Button */
+        #class{
+            background-image:url(backgroundimg.jpg);
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-color: #ffffff;
+        }
+        #googleLoginBtn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem; /* 12px */
+            width: 100%;
+            padding: 0.75rem 1rem; /* 12px 16px */
+            font-size: 0.875rem; /* 14px */
+            font-weight: 600; /* semibold */
+            border-radius: 0.375rem; /* 6px */
+            color: #f6f9fe; /* gray-800 */
+            /*background-image:url(backgroundimg.jpg);
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-color: #ffffff; /* white */
+            border: 1px solid #d1d5db; /* gray-300 */
+            box-shadow: 0 1px 2px 0 rgba(235, 220, 220, 0.05);
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        #googleLoginBtn:hover {
+            background-color: #e9e1df; /* gray-50 */
+        }
+        #googleLoginBtn img {
+            width: 1.25rem; /* 20px */
+            height: 1.25rem; /* 20px */
+        }
+    </style>
+</head>
+<body id="class" class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen font-sans">
+
+    <div  class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-lg shadow-xl">
+        <h2 class="text-3xl font-bold text-center text-white">WELCOME..!</h2>
+        
+        <!-- Form for logging in -->
+        <form id="login-form" class="space-y-6">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-300">Email</label>
+                <input id="email" name="email" type="email" autocomplete="email" required
+                       class="w-full px-3 py-2 mt-1 text-gray-100 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-300">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required
+                       class="w-full px-3 py-2 mt-1 text-gray-100 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <!-- Links for forgot password and create account -->
+            <div class="flex items-center justify-between text-sm">
+                <a href="forgot.html" class="font-medium text-indigo-400 hover:text-indigo-300">
+                    Forgot password?
+                </a>
+                <a href="create.html" class="font-medium text-indigo-400 hover:text-indigo-300">
+                    Create an account
+                </a>
+            </div>
+
+            <!-- Message box for errors or success -->
+            <div id="messageBox" class="p-4 text-sm rounded-md"></div>
+
+            <!-- Login Button -->
+            <div>
+                <button type="submit" 
+                        class="w-full flex justify-center py-3 px-4 text-sm font-semibold rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-900 transition-colors duration-300">
+                    Login
+                </button>
+            </div>
+        </form>
+
+        <!-- Divider "Or continue with" -->
+        <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-gray-600"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+                <span class="px-2 bg-gray-800 text-gray-400">Or continue with</span>
+            </div>
+        </div>
+
+        <!-- Google Login Button -->
+        <div>
+            <button id="googleLoginBtn">
+                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo">
+                Login with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            onAuthStateChanged,
+            signInWithEmailAndPassword,
+            GoogleAuthProvider,
+            signInWithPopup
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore,
+            setLogLevel 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Configuration ---
+const firebaseConfig = {
+  apiKey: "AIzaSyBqf4xrDm8xndl9Fa-StCVM161i_wBrx7s",
+  authDomain: "my-app-fcb3f.firebaseapp.com",
+  projectId: "my-app-fcb3f",
+  storageBucket: "my-app-fcb3f.firebasestorage.app",
+  messagingSenderId: "135783055383",
+  appId: "1:135783055383:web:5dba7c51d46332b7155c52"
+};
+        let auth, db;
+
+        // --- Message Box Helper ---
+        const messageBox = document.getElementById('messageBox');
+        function showMessage(message, isError = false) {
+            messageBox.textContent = message;
+            messageBox.className = `p-4 text-sm rounded-md ${isError ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}`;
+            messageBox.style.display = 'block';
+        }
+        function hideMessage() {
+            messageBox.style.display = 'none';
+        }
+
+        // --- Firebase Initialization ---
+        async function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug');
+
+                // Sign in the user
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Listen for auth state changes
+                onAuthStateChanged(auth, (user) => {
+                    if (user && !user.isAnonymous) {
+                        // User is signed in, redirect to the main page
+                        console.log("User is signed in:", user.uid);
+                        showMessage("Login successful! Redirecting...", false);
+                        window.location.href = 'front1.html';
+                        // Redirect to your main app page
+                        setTimeout(() => {
+                           // window.location.href = 'front.html'; // Your front page
+                           console.log("Redirecting to front1.html");
+                           alert("Login Successful! (This is a placeholder, you would redirect here)");
+                        }, 1500);
+                    } else {
+                        console.log("User is signed out or anonymous.");
+                    }
+                });
+
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                showMessage("Failed to initialize application. Please try again later.", true);
+            }
+        }
+
+        // --- Email/Password Login Logic ---
+        const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessage();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+
+            if (!auth) {
+                
+                 showMessage("Authentication service is not ready. Please wait.", true);
+                 return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = 'index.html';
+                // The onAuthStateChanged listener will handle the successful login and redirect
+            } catch (error) {
+                console.error("Login Error:", error);
+                // Handle common Firebase errors
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    showMessage("Invalid email or password. Please try again.", true);
+                } else {
+                    showMessage(`Error: ${error.message}`, true);
+                    
+                }
+            }
+        });
+
+        // --- Google Login Logic ---
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        googleLoginBtn.addEventListener('click', async () => {
+            hideMessage();
+            if (!auth) {
+               
+                 showMessage("Authentication service is not ready. Please wait.", true);
+                 return;
+            } 
+            
+            const provider = new GoogleAuthProvider();
+
+            try {
+                const result = await signInWithPopup(auth, provider);
+                // The onAuthStateChanged listener will handle the successful login
+                console.log("Google sign-in successful:", result.user);
+                window.location.href = 'index.html';
+                // You might want to also check if this is a new user
+                // and create a Firestore document for them here.
+            } catch (error) {
+                console.error("Google Login Error:", error);
+                showMessage(`Google login failed: ${error.message}`, true);
+            }
+        });
+
+        // Initialize the app on page load
+        initializeFirebase();
+
+    </script>
+</body>
+</html>
