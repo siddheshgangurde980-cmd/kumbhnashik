@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #class{
+            background-image:url(backgroundimg.jpg);
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-color: #ffffff;
+        }
+        /* Use Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom style for the message box */
+        #messageBox {
+            display: none; /* Hidden by default */
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body id="class" class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen font-sans">
+
+    <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-lg shadow-xl">
+        <h2 class="text-3xl font-bold text-center text-white">Reset Your Password</h2>
+        <p class="text-center text-gray-400">
+            Enter your email address and we will send you a link to reset your password.
+        </p>
+        
+        <!-- Form for forgot password -->
+        <form id="forgot-password-form" class="space-y-6">
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-300">Email</label>
+                <input id="email" name="email" type="email" autocomplete="email" required
+                       class="w-full px-3 py-2 mt-1 text-gray-100 bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <!-- Message box for errors or success -->
+            <div id="messageBox" class="p-4 text-sm rounded-md"></div>
+
+            <div>
+                <button type="submit" 
+                        class="w-full flex justify-center py-3 px-4 text-sm font-semibold rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-900 transition-colors duration-300">
+                    Send Reset Link
+                </button>
+            </div>
+        </form>
+
+        <div class="text-sm text-center">
+            <a href="login1.html" class="font-medium text-indigo-400 hover:text-indigo-300">
+                Back to Login
+            </a>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            onAuthStateChanged,
+            sendPasswordResetEmail
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore,
+            setLogLevel 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Configuration ---
+const firebaseConfig = {
+  apiKey: "AIzaSyBqf4xrDm8xndl9Fa-StCVM161i_wBrx7s",
+  authDomain: "my-app-fcb3f.firebaseapp.com",
+  projectId: "my-app-fcb3f",
+  storageBucket: "my-app-fcb3f.firebasestorage.app",
+  messagingSenderId: "135783055383",
+  appId: "1:135783055383:web:5dba7c51d46332b7155c52"
+};
+        let auth, db;
+
+        // --- Message Box Helper ---
+        const messageBox = document.getElementById('messageBox');
+        function showMessage(message, isError = false) {
+            messageBox.textContent = message;
+            messageBox.className = `p-4 text-sm rounded-md ${isError ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}`;
+            messageBox.style.display = 'block';
+        }
+        function hideMessage() {
+            messageBox.style.display = 'none';
+        }
+
+        // --- Firebase Initialization ---
+        async function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug');
+
+                // We still need to sign in to use auth services
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    console.log("Auth state ready.");
+                });
+
+            } catch (error) {
+                
+                console.error("Firebase Initialization Error:", error);
+                showMessage("Failed to initialize application. Please try again later.", true);
+            }
+        }
+
+        // --- Forgot Password Logic ---
+        const forgotPasswordForm = document.getElementById('forgot-password-form');
+        forgotPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideMessage();
+
+            const email = document.getElementById('email').value;
+
+            if (!auth) {
+                
+                 showMessage("Authentication service is not ready. Please wait.", true);
+                 return;
+            }
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                
+                showMessage("Success! If an account exists for that email, a password reset link has been sent.", false);
+                
+            } catch (error) {
+                console.error("Forgot Password Error:", error);
+                // Show a generic message for security (prevents email enumeration)
+                showMessage("Success! If an account exists for that email, a password reset link has been sent.", false);
+            }
+        });
+
+        // Initialize the app on page load
+        initializeFirebase();
+
+    </script>
+</body>
+</html>
